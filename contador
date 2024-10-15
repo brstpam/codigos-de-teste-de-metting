@@ -1,0 +1,26 @@
+(function executeRule(current, previous /*null when async*/) {
+
+    var problemSysId = current.sys_id;
+    var incidentGr = new GlideRecord('incident');
+    incidentGr.addQuery('problem_id', problemSysId);
+    incidentGr.orderBy('u_impact_start');
+    incidentGr.query();
+
+    var baseImpactEnd = null;
+    var incidentCount = 0;
+
+    while (incidentGr.next()) {
+        if (!baseImpactEnd) {
+            baseImpactEnd = incidentGr.u_impact_end;
+            continue;
+        }
+
+        if (incidentGr.u_impact_start > baseImpactEnd) {
+            incidentCount++;
+        }
+    }
+
+    current.incident_recorrent = incidentCount;
+    current.update();
+
+})(current, previous);
